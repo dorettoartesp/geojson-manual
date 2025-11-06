@@ -1,12 +1,12 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'GeoJSON Documentation'
+baseURL = 'https://dorettoartesp.github.io/geojson-manual/'
+languageCode = 'pt-br'
+title = 'Manual Técnico GeoJSON - ARTESP'
 theme = 'hugo-book'
 
 # Book theme configuration
 [params]
   # Set source repository location
-  BookRepo = ''
+  BookRepo = 'https://github.com/dorettoartesp/geojson-manual'
 
   # Enable search
   BookSearch = true
