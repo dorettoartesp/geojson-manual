@@ -1,0 +1,32 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'GeoJSON Documentation'
+theme = 'hugo-book'
+
+# Book theme configuration
+[params]
+  # Set source repository location
+  BookRepo = ''
+
+  # Enable search
+  BookSearch = true
+
+  # Display menu to sections
+  BookMenuBundle = '/menu'
+
+  # Folder name in content/ for sections
+  BookSection = 'docs'
+
+  # Enable table of contents
+  BookToC = true
+
+  # Enable code copy button
+  BookComments = false
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.tableOfContents]
+    startLevel = 1
+    endLevel = 6
