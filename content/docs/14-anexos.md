@@ -18,7 +18,6 @@ Os arquivos necessários para validação e referência estão disponíveis no p
 |:---------------------------|:-------------------------------------------------------------|:----------|
 | **JSON Schema**            | `conserva.schema.json` / `obras.schema.json`                 | Schemas para validação estrutural e de dados. |
 | **Script de Validação**    | `validar_geojson.py`                                         | Script Python para validação automatizada de arquivos GeoJSON (veja seção 9.1.3). |
-| **Mapeamento de Rodovias** | `mapeamento_rodovias.xlsx`                                   | Tabela com códigos e nomes oficiais das rodovias. |
-| **Tabelas de Códigos**     | `local.xlsx`, `programas.xlsx`, `item.xlsx`                  | Arquivos de referência para os códigos permitidos. |
+| **Tabelas de Códigos**     | `rodovias.xlsx`,`local.xlsx`, `programas.xlsx`, `item.xlsx`                  | Arquivos de referência para os códigos permitidos. |
 
 ---
