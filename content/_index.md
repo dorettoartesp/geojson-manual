@@ -28,7 +28,7 @@ type: docs
 
 Este manual técnico estabelece os procedimentos, critérios e diretrizes para a geração, conversão, validação e entrega de arquivos em formato GeoJSON à ARTESP, conforme especificado no **Memorando Circular nº 0087484992**.
 
-**O manual está organizado em 15 seções:**
+**O manual está organizado em 14 seções:**
 
 1. Introdução
 2. O que é GeoJSON
@@ -44,6 +44,5 @@ Este manual técnico estabelece os procedimentos, critérios e diretrizes para a
 12. Suporte e Contato
 13. Glossário
 14. Anexos
-15. Apêndices - Tabelas de Códigos
 
 **Use o menu lateral para navegar pelos capítulos do manual.**
