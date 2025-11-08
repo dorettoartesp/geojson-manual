@@ -99,7 +99,7 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 
 **Formatos de código de rodovia (v1.1):**
 
-O campo `rodovia` aceita 4 formatos (padrão DER/SP sem hífen):
+O campo `rodovia` aceita 4 formatos:
 
 1. **Formato 1:** `SP` + 7 dígitos
    **Exemplo:** `SP0000280`
