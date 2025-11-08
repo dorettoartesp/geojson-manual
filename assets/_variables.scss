@@ -1,0 +1,23 @@
+// Custom SCSS variables for Hugo Book theme
+// This file overrides the default theme variables
+
+// ============================================
+// Layout Width Customization
+// ============================================
+
+// Aumentar largura máxima do container principal
+// Padrão: 80rem (1280px) → Novo: 100rem (1600px)
+$container-max-width: 100rem;
+
+// Reduzir largura das sidebars para dar mais espaço ao conteúdo
+// Padrão: 16rem (256px) → Novo: 14rem (224px)
+$menu-width: 14rem;  // Sidebar esquerda (menu)
+$toc-width: 14rem;   // Sidebar direita (table of contents)
+
+// ============================================
+// Outras opções de largura disponíveis:
+// ============================================
+// $container-max-width: 90rem;   // 1440px - aumento moderado
+// $container-max-width: 100rem;  // 1600px - layout largo (atual)
+// $container-max-width: 120rem;  // 1920px - extra largo
+// $container-max-width: 100%;    // full width total
