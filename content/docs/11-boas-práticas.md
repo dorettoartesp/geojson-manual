@@ -17,7 +17,51 @@ bookToc: true
 
 ---
 
-### **11.2 Qualidade dos Dados**
+### **11.2 Escolha do Tipo de Geometria**
+
+O tipo de geometria a ser utilizado no GeoJSON deve refletir a natureza espacial do serviço ou obra. A escolha correta da geometria é fundamental para a interpretação e visualização dos dados.
+
+**Tabela de Orientação:**
+
+| Categoria do Item | Tipo de Geometria Esperado | Exemplo de Serviço |
+|:------------------|:---------------------------|:-------------------|
+| Obras e serviços pontuais | `Point` | Instalação de radar, etc. |
+| Serviços lineares | `LineString` | Recuperação de pavimento, implantação de faixa adicional, etc. |
+| Intervenções em área | `Polygon` | Construção de pátio, área de SAU, etc. |
+| Itens múltiplos e discretos | `MultiPoint` | Instalação de série de sensores, tachões, etc. |
+
+**Diretrizes:**
+
+1. **Point (Ponto):** Use para obras ou serviços que ocorrem em um local específico e pontual:
+   - Instalação de equipamento (radar, câmera, sensor)
+   - Construção de passarela
+   - Instalação de dispositivo de segurança
+
+2. **LineString (Linha):** Use para serviços que ocorrem ao longo de um trecho linear da rodovia:
+   - Recuperação de pavimento
+   - Implantação de faixa adicional
+   - Pintura de faixa de rolamento
+   - Instalação de guard-rail ou defensas metálicas
+
+3. **Polygon (Polígono):** Use para intervenções que ocupam uma área delimitada:
+   - Construção de pátio de estacionamento
+   - Área de SAU (Serviço de Atendimento ao Usuário)
+   - Área de intervenção para obras complexas
+   - Praça de pedágio
+
+4. **MultiPoint (Múltiplos Pontos):** Use para instalações de vários itens similares e discretos ao longo de um trecho:
+   - Série de sensores distribuídos
+   - Conjunto de tachões
+   - Placas de sinalização vertical ao longo de um segmento
+
+**⚠️ Importante:**
+- Evite usar `Point` para serviços lineares ou de área
+- Não use `Polygon` quando uma linha seria mais apropriada
+- Para itens muito discretos e separados, prefira `MultiPoint` em vez de múltiplas features com `Point`
+
+---
+
+### **11.3 Qualidade dos Dados**
 
 1. **Validação em múltiplas etapas:** Valide os dados antes e depois da conversão, e também visualmente em um software GIS.
 
@@ -27,7 +71,7 @@ bookToc: true
 
 ---
 
-### **11.3 Nomenclatura e Padronização**
+### **11.4 Nomenclatura e Padronização**
 
 1. **Nomes de arquivos:** Use exatamente o padrão especificado: `L<lote>_<tipo>_2026_R0.geojson`
 
@@ -37,7 +81,7 @@ bookToc: true
 
 ---
 
-### **11.4 Performance e Tamanho**
+### **11.5 Performance e Tamanho**
 
 1. **Arquivos grandes:** Remova casas decimais desnecessárias e evite indentação em arquivos de produção para reduzir o tamanho.
 
@@ -45,7 +89,7 @@ bookToc: true
 
 ---
 
-### **11.5 Segurança e Privacidade**
+### **11.6 Segurança e Privacidade**
 
 1. **Dados sensíveis:** Não inclua informações confidenciais ou de caráter pessoal em campos de texto livre como `observacoes_gerais`.
 

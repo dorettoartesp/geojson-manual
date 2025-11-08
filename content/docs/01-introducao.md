@@ -8,9 +8,9 @@ bookToc: true
 
 > **Contexto:** Este manual é o guia técnico para a metodologia de entrega da Programação Anual de 2026. O processo foi dividido em duas fases para permitir a adaptação tecnológica das concessionárias:
 >
-> 1. **Fase 1 (Entrega em Excel):** Coleta inicial dos dados de **atributos** (não geográficos) através de planilhas Excel padronizadas. O campo `id` é a chave primária que identifica unicamente cada serviço ou obra.
+> 1. **Fase 1 (Entrega em Excel):** Coleta inicial dos dados de **atributos** (não geográficos) através de planilhas Excel padronizadas.
 >
-> 2. **Fase 2 (Entrega em GeoJSON):** Entrega final em formato GeoJSON. As concessionárias deverão consolidar os dados de atributos da Fase 1 com os dados georreferenciados correspondentes, usando o `id` como chave de vinculação.
+> 2. **Fase 2 (Entrega em GeoJSON):** Entrega final em formato GeoJSON. As concessionárias deverão consolidar os dados de atributos da Fase 1 com os dados georreferenciados correspondentes.
 >
 > Este documento detalha os requisitos técnicos para a **Fase 2**, ou seja, a estrutura e o conteúdo do arquivo GeoJSON final.
 
