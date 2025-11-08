@@ -6,7 +6,7 @@ bookToc: true
 
 ## **8. Exemplos Práticos Completos**
 
-Os exemplos a seguir foram atualizados para incluir o campo `id`.
+Os exemplos a seguir demonstram a estrutura completa de arquivos GeoJSON válidos.
 
 ---
 
@@ -19,12 +19,11 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
   "type": "FeatureCollection",
   "crs": {
     "type": "name",
-    "properties": { "name": "EPSG:4674" }
+    "properties": { "name": "urn:ogc:def:crs:EPSG::4674" }
   },
   "metadata": {
     "schema_version": "R0",
-    "ano_programacao": 2026,
-    "data_geracao": "2025-10-30T14:30:00-03:00"
+    "data_geracao": "2025-11-05T10:10:00-03:00"
   },
   "features": [
     {
@@ -34,7 +33,7 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "coordinates": [ [-47.0653, -23.5489], [-47.0683, -23.5519] ]
       },
       "properties": {
-        "id": 1,
+        "id": "conserva-001",
         "lote": "L13",
         "rodovia": "SP0000280",
         "item": "a.1.2",
@@ -47,8 +46,8 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
           "PISTA_NORTE",
           "PISTA_SUL"
         ],
-        "data_inicial": "2026-02-01T08:00:00-03:00",
-        "data_final": "2026-04-30T18:00:00-03:00",
+        "data_inicial": "2026-02-01",
+        "data_final": "2026-04-30",
         "observacoes_gerais": "Serviço programado para período de baixo fluxo de tráfego"
       }
     },
@@ -59,7 +58,7 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "coordinates": [ [-47.08, -23.56], [-47.09, -23.57] ]
       },
       "properties": {
-        "id": 2,
+        "id": "conserva-002",
         "lote": "L13",
         "rodovia": "SPA000114",
         "item": "b.3.1",
@@ -71,8 +70,8 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "local": [
           "CANTEIRO_CENTRAL"
         ],
-        "data_inicial": "2026-01-15T07:00:00-03:00",
-        "data_final": "2026-12-20T17:00:00-03:00",
+        "data_inicial": "2026-01-15",
+        "data_final": "2026-12-20",
         "observacoes_gerais": null
       }
     }
@@ -91,12 +90,11 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
   "type": "FeatureCollection",
   "crs": {
     "type": "name",
-    "properties": { "name": "EPSG:4674" }
+    "properties": { "name": "urn:ogc:def:crs:EPSG::4674" }
   },
   "metadata": {
     "schema_version": "R0",
-    "ano_programacao": 2026,
-    "data_geracao": "2025-10-30T15:45:00-03:00"
+    "data_geracao": "2025-11-05T10:15:00-03:00"
   },
   "features": [
     {
@@ -106,7 +104,7 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "coordinates": [ -47.0653, -23.5489 ]
       },
       "properties": {
-        "id": 1,
+        "id": "obra-101",
         "lote": "L22",
         "rodovia": "SP0000310",
         "programa": "CAPEX",
@@ -121,8 +119,8 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
           "PISTA_NORTE",
           "PISTA_SUL"
         ],
-        "data_inicial": "2026-04-01T08:00:00-03:00",
-        "data_final": "2026-10-31T18:00:00-03:00",
+        "data_inicial": "2026-04-01",
+        "data_final": "2026-10-31",
         "observacoes_gerais": "Obra de acessibilidade em área urbana"
       }
     },
@@ -133,7 +131,7 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "coordinates": [ [-47.2, -23.6], [-47.23, -23.615] ]
       },
       "properties": {
-        "id": 2,
+        "id": "obra-102",
         "lote": "L22",
         "rodovia": "SPA000248",
         "programa": "NS",
@@ -147,8 +145,8 @@ Os exemplos a seguir foram atualizados para incluir o campo `id`.
         "local": [
           "PISTA_NORTE"
         ],
-        "data_inicial": "2026-02-15T08:00:00-03:00",
-        "data_final": "2026-11-30T18:00:00-03:00",
+        "data_inicial": "2026-02-15",
+        "data_final": "2026-11-30",
         "observacoes_gerais": null
       }
     }

@@ -15,8 +15,8 @@ bookCollapseSection: false
 **Agência Reguladora de Serviços Públicos Delegados de Transporte do Estado de São Paulo – ARTESP**
 **Superintendência de Tecnologia da Informação e Engenharia Digital – SUTID**
 
-- **Versão:** 1.1
-- **Data:** 05/11/2025
+- **Versão:** 1.0
+- **Data:** 10/11/2025
 - **Classificação:** Público
 - **Público-alvo:** Concessionárias de rodovias e integradores técnicos
 
@@ -26,8 +26,7 @@ bookCollapseSection: false
 
 | Versão | Data       | Autor/Área  | Descrição da Alteração |
 |:-------|:-----------|:------------|:-----------------------|
-| 1.1    | 05/11/2025 | SUTID/GCCM  | **(Revisão Consolidada)** Adição do campo `id` (inteiro) como chave de ligação obrigatória. Reformulação do modelo de dados (Seção 5 e 6) para agrupar o campo `local`. Atualização dos padrões de código de rodovia (suporte a 4 formatos). |
-| 1.0    | 30/10/2025 | SUTID/GCCM  | Versão inicial pública |
+| 1.0    | 10/11/2025 | SUTID/GCCM  | Versão inicial pública |
 
 ---
 

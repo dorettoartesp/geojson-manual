@@ -10,10 +10,10 @@ bookToc: true
 
 As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 
-| Arquivo                                     | Conteúdo                                      | Schema de Validação      |
-|:--------------------------------------------|:----------------------------------------------|:-------------------------|
-| `L<lote>_conservacao_2026_R0.geojson`      | Programação Anual de Conservação              | `conserva.schema.json`   |
-| `L<lote>_obras_2026_R0.geojson`            | Programação Anual de Obras e Revitalização    | `obras.schema.json`      |
+| Arquivo                                     | Conteúdo                                      | Schema de Validação         |
+|:--------------------------------------------|:----------------------------------------------|:----------------------------|
+| `L<lote>_conservacao_2026_R0.geojson`      | Programação Anual de Conservação              | `conserva.schema.r0.json`   |
+| `L<lote>_obras_2026_R0.geojson`            | Programação Anual de Obras e Revitalização    | `obras.schema.r0.json`      |
 
 **Padrão de nomenclatura:** `L<lote>_<tipo>_2026_R0.geojson`
 
@@ -29,12 +29,14 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 "crs": {
   "type": "name",
   "properties": {
-    "name": "EPSG:4674"
+    "name": "urn:ogc:def:crs:EPSG::4674"
   }
 }
 ```
 
 > **Ordem das coordenadas:** `[longitude, latitude]` (em graus decimais)
+>
+> **Formato CRS:** Use o identificador URN completo `urn:ogc:def:crs:EPSG::4674` conforme especificação OGC
 
 ---
 
@@ -44,7 +46,8 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 |:-------------------------|:--------------|
 | **Codificação**          | UTF-8 sem BOM (Byte Order Mark) |
 | **Separador decimal**    | Ponto (`.`) - nunca vírgula |
-| **Formato de datas**     | ISO 8601 com fuso horário: `YYYY-MM-DDThh:mm:ss-03:00` |
+| **Formato de datas**     | `YYYY-MM-DD` (ex: `2026-03-15`) |
+| **JSON Schema**          | Draft 2020-12 |
 
 ---
 
@@ -54,18 +57,18 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 
 | Campo                       | Tipo         | Descrição | Exemplo |
 |:----------------------------|:-------------|:----------|:--------|
-| **`id`**                    | **integer**  | **(Obrigatório)** Identificador único do serviço. Chave de ligação com a planilha Excel. | `1` |
-| **`lote`**                  | string       | Identificador do lote (L1, L6, L7, etc.). | `"L13"` |
-| **`rodovia`**               | string       | Código da rodovia estadual (padrão DER/SP sem hífen). | `"SP0000280"` |
+| **`id`**                    | **string**   | **(Obrigatório)** Identificador único do serviço (máx. 50 caracteres). Deve ser único em todo o arquivo GeoJSON. | `"conserva-001"` |
+| **`lote`**                  | string       | Identificador do lote (formato: L + exatamente 2 dígitos, ex: L01, L13, L22). | `"L13"` |
+| **`rodovia`**               | string       | Código da rodovia. Consulte os códigos válidos na planilha `rodovias.xlsx` disponível no Portal de Dados Abertos ([dadosabertos.artesp.sp.gov.br](https://dadosabertos.artesp.sp.gov.br/dataset/programacao-de-obras)). | `"SP0000280"` |
 | **`item`**                  | string       | Código do item de serviço (ex: a.1.2). | `"a.1.2"` |
 | **`detalhamento_servico`**  | string       | Descrição clara do serviço. | `"Recuperação de pavimento"` |
 | **`unidade`**               | string       | Unidade de medida (km, m, m2, etc.). | `"km"` |
 | **`quantidade`**            | number       | Quantidade planejada (até 3 casas decimais). | `15.500` |
 | **`km_inicial`**            | number       | Quilometragem inicial (até 3 casas decimais). | `125.000` |
 | **`km_final`**              | number       | Quilometragem final (até 3 casas decimais). | `140.500` |
-| **`local`**                 | array        | **(Agregado)** Códigos de localização (mínimo 1 item). | `["PISTA_NORTE", "PISTA_SUL"]` |
-| **`data_inicial`**          | string       | Data/hora de início (ISO 8601). | `"2025-11-15T08:00:00-03:00"` |
-| **`data_final`**            | string       | Data/hora de término (ISO 8601). | `"2026-03-20T18:00:00-03:00"` |
+| **`local`**                 | array        | Códigos de localização (mínimo 1 item). | `["PISTA_NORTE", "PISTA_SUL"]` |
+| **`data_inicial`**          | string       | Data de início (formato: YYYY-MM-DD). | `"2026-03-15"` |
+| **`data_final`**            | string       | Data de término (formato: YYYY-MM-DD). | `"2026-07-20"` |
 | **`observacoes_gerais`**    | string/null  | Observações gerais (usar `null` se não houver). | `null` |
 
 ---
@@ -74,9 +77,9 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 
 | Campo                       | Tipo         | Descrição | Exemplo |
 |:----------------------------|:-------------|:----------|:--------|
-| **`id`**                    | **integer**  | **(Obrigatório)** Identificador único da obra. Chave de ligação com a planilha Excel. | `1` |
-| **`lote`**                  | string       | Identificador do lote. | `"L22"` |
-| **`rodovia`**               | string       | Código da rodovia estadual (padrão DER/SP sem hífen). | `"SP0000280"` |
+| **`id`**                    | **string**   | **(Obrigatório)** Identificador único da obra (máx. 50 caracteres). Deve ser único em todo o arquivo GeoJSON. | `"obra-101"` |
+| **`lote`**                  | string       | Identificador do lote (formato: L + exatamente 2 dígitos, ex: L01, L13, L22). | `"L22"` |
+| **`rodovia`**               | string       | Código da rodovia. Consulte os códigos válidos na planilha `rodovias.xlsx` disponível no Portal de Dados Abertos ([dadosabertos.artesp.sp.gov.br](https://dadosabertos.artesp.sp.gov.br/dataset/programacao-de-obras)). | `"SP0000280"` |
 | **`programa`**              | string       | Tipo de programa (REVIT, CAPEX, NS). | `"CAPEX"` |
 | **`item`**                  | integer      | Número do item de serviço. | `5` |
 | **`subitem`**               | integer      | Número do subitem de serviço. | `2` |
@@ -85,9 +88,9 @@ As concessionárias devem entregar **dois arquivos GeoJSON separados por lote**:
 | **`quantidade`**            | number       | Quantidade planejada (até 3 casas decimais). | `1.000` |
 | **`km_inicial`**            | number       | Quilometragem inicial. | `225.000` |
 | **`km_final`**              | number       | Quilometragem final. | `225.100` |
-| **`local`**                 | array        | **(Agregado)** Códigos de localização. | `["PISTA_SUL", "DISPOSITIVO"]` |
-| **`data_inicial`**          | string       | Data/hora de início (ISO 8601). | `"2025-06-01T08:00:00-03:00"` |
-| **`data_final`**            | string       | Data/hora de término (ISO 8601). | `"2027-01-15T18:00:00-03:00"` |
+| **`local`**                 | array        | Códigos de localização. | `["PISTA_SUL", "DISPOSITIVO"]` |
+| **`data_inicial`**          | string       | Data de início (formato: YYYY-MM-DD). | `"2026-01-20"` |
+| **`data_final`**            | string       | Data de término (formato: YYYY-MM-DD). | `"2026-11-30"` |
 | **`observacoes_gerais`**    | string/null  | Observações gerais (usar `null` se não houver). | `"Obra em parceria com prefeitura"` |
 
 ---
@@ -127,9 +130,15 @@ Todo arquivo GeoJSON deve incluir o bloco `metadata`:
 ```json
 "metadata": {
   "schema_version": "R0",
-  "ano_programacao": 2026,
-  "data_geracao": "2025-11-05T15:00:00-03:00"
+  "data_geracao": "2025-11-05T10:30:00-03:00"
 }
 ```
+
+**Campos do metadata:**
+
+| Campo                | Tipo   | Descrição | Exemplo |
+|:---------------------|:-------|:----------|:--------|
+| **`schema_version`** | string | Versão do schema. Especifica qual revisão do schema está sendo usada (R0, R1, R2, etc.). Use a versão correspondente ao schema de validação. | `"R0"` |
+| **`data_geracao`**   | string | Data e hora de geração do arquivo com timezone (RFC3339). | `"2025-11-05T10:30:00-03:00"` |
 
 ---

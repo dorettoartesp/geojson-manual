@@ -17,8 +17,8 @@ type: docs
 
 ### Informações da Versão
 
-- **Versão:** 1.1
-- **Data:** 05/11/2025
+- **Versão:** 1.0
+- **Data:** 10/11/2025
 - **Classificação:** Público
 - **Público-alvo:** Concessionárias de rodovias e integradores técnicos
 

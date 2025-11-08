@@ -24,7 +24,7 @@ A ARTESP fornece schemas JSON para validação automatizada.
 npm install -g ajv-cli
 
 # Validar arquivo de conservação:
-ajv validate -s conserva.schema.json -d L13_conservacao_2026_R0.geojson
+ajv validate -s conserva.schema.r0.json -d L13_conservacao_2026_R0.geojson
 ```
 
 ---
@@ -72,11 +72,11 @@ A ARTESP disponibiliza um script Python pronto para validação, que pode ser ba
 **Pré-requisitos:**
 
 ```bash
-# Instalar a biblioteca jsonschema
-pip install jsonschema
+# Instalar as bibliotecas necessárias
+pip install jsonschema rfc3339-validator
 
 # ou usando uv:
-uv pip install jsonschema
+uv pip install jsonschema rfc3339-validator
 ```
 
 **Como usar:**
@@ -85,35 +85,37 @@ O script recebe dois argumentos: o caminho para o schema JSON e o caminho para o
 
 ```bash
 # Validar arquivo de conservação:
-python validar_geojson.py schemas/conserva.schema.json L13_conservacao_2026_R0.geojson
+python validar_geojson.py schemas/conserva.schema.r0.json L13_conservacao_2026_R0.geojson
 
 # Validar arquivo de obras:
-python validar_geojson.py schemas/obras.schema.json L22_obras_2026_R0.geojson
+python validar_geojson.py schemas/obras.schema.r0.json L22_obras_2026_R0.geojson
 
 # Usando uv (recomendado):
-uv run python validar_geojson.py schemas/conserva.schema.json L13_conservacao_2026_R0.geojson
+uv run python validar_geojson.py schemas/conserva.schema.r0.json L13_conservacao_2026_R0.geojson
 ```
 
 **Saída do script em caso de sucesso:**
 
 ```
-Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.json'...
+Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.r0.json'...
 ----------------------------------------------------------------------
-[1/3] ✅ Schema 'conserva.schema.json' carregado com sucesso.
+[1/3] ✅ Schema 'conserva.schema.r0.json' carregado com sucesso.
 [2/3] ✅ Arquivo GeoJSON 'L13_conservacao_2026_R0.geojson' carregado com sucesso.
-[3/3] ✅ Validação concluída.
+[3/4] ✅ Validação do schema concluída.
+[4/4] Verificando unicidade dos IDs...
+[4/4] ✅ Todos os IDs são únicos.
 
 🎉 SUCESSO: O arquivo 'L13_conservacao_2026_R0.geojson' é válido.
 ```
 
-**Saída do script em caso de erro:**
+**Saída do script em caso de erro (schema):**
 
 ```
-Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.json'...
+Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.r0.json'...
 ----------------------------------------------------------------------
-[1/3] ✅ Schema 'conserva.schema.json' carregado com sucesso.
+[1/3] ✅ Schema 'conserva.schema.r0.json' carregado com sucesso.
 [2/3] ✅ Arquivo GeoJSON 'L13_conservacao_2026_R0.geojson' carregado com sucesso.
-[3/3] ❌ Validação falhou.
+[3/4] ❌ Validação do schema falhou.
 
 🔥 FALHA: O arquivo 'L13_conservacao_2026_R0.geojson' é inválido.
 -------------------- Detalhes do Erro --------------------
@@ -123,10 +125,30 @@ Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.json'...
 ----------------------------------------------------------
 ```
 
+**Saída do script em caso de erro (IDs duplicados):**
+
+```
+Validando 'L13_conservacao_2026_R0.geojson' contra 'conserva.schema.r0.json'...
+----------------------------------------------------------------------
+[1/3] ✅ Schema 'conserva.schema.r0.json' carregado com sucesso.
+[2/3] ✅ Arquivo GeoJSON 'L13_conservacao_2026_R0.geojson' carregado com sucesso.
+[3/4] ✅ Validação do schema concluída.
+[4/4] Verificando unicidade dos IDs...
+[4/4] ❌ Verificação de unicidade falhou.
+
+🔥 FALHA: IDs duplicados encontrados no arquivo 'L13_conservacao_2026_R0.geojson'.
+-------------------- IDs Duplicados --------------------
+  ID 'conserva-001' está duplicado (feature index: 3)
+  ID 'conserva-001' está duplicado (feature index: 7)
+----------------------------------------------------------
+```
+
 **Vantagens do script fornecido:**
 
 - ✅ Interface amigável com mensagens em português
-- ✅ Exibe progresso da validação em 3 etapas
+- ✅ Exibe progresso da validação em 4 etapas
+- ✅ Valida conformidade com o schema JSON (Draft 2020-12)
+- ✅ Verifica unicidade dos IDs em todo o arquivo
 - ✅ Mensagens de erro detalhadas e formatadas
 - ✅ Indica exatamente onde está o problema (caminho no JSON)
 - ✅ Retorna código de saída apropriado (0 = sucesso, 1 = erro) para automação
@@ -139,7 +161,7 @@ O script pode ser usado em processos automatizados:
 #!/bin/bash
 # Exemplo de script de validação automatizada
 
-if python validar_geojson.py schemas/conserva.schema.json L13_conservacao_2026_R0.geojson; then
+if python validar_geojson.py schemas/conserva.schema.r0.json L13_conservacao_2026_R0.geojson; then
     echo "Validação passou! Arquivo pronto para envio."
     exit 0
 else
@@ -160,12 +182,15 @@ Verificação manual no QGIS ou com Python/Shapely para validar se as geometrias
 
 #### **9.3.1 Checklist de Propriedades**
 
-- ✅ Campo `id` presente, inteiro e não nulo
+- ✅ Campo `id` presente, string (máx. 50 caracteres) e não nulo
+- ✅ Todos os IDs são únicos em todo o arquivo GeoJSON
 - ✅ Todos os campos obrigatórios presentes
-- ✅ Valores de lote dentro dos permitidos
-- ✅ Códigos de rodovia no padrão correto
+- ✅ Valores de lote no formato correto (L + 2 dígitos, ex: L01, L22)
+- ✅ Códigos de rodovia no padrão correto (4 formatos aceitos)
 - ✅ Campo `local` é um array com pelo menos 1 item
-- ✅ Datas no formato ISO 8601 com fuso horário
+- ✅ Datas no formato YYYY-MM-DD (ex: 2026-03-15)
+- ✅ Metadata contém `schema_version` e `data_geracao` (RFC3339)
+- ✅ CRS declarado como `urn:ogc:def:crs:EPSG::4674`
 - ✅ Coordenadas dentro do território brasileiro
 
 ---
