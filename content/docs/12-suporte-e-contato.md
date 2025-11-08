@@ -32,7 +32,6 @@ Ao entrar em contato, informe:
 
 Versões atualizadas deste manual e dos schemas serão divulgadas via:
 
-- Portal institucional da ARTESP
-- Comunicados oficiais às concessionárias
+- Portal de Dados Abertos da ARTESP
 
 ---

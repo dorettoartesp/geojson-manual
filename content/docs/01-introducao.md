@@ -6,7 +6,7 @@ bookToc: true
 
 # **1. Introdução**
 
-> **Contexto:** Este manual é o guia técnico para a metodologia de entrega da Programação Anual de 2026. O processo foi dividido em duas fases para permitir a adaptação tecnológica das concessionárias:
+> **Contexto:** Este manual é o guia técnico para a metodologia de entrega de programação de obras e serviços de conservação. O processo foi dividido em duas fases para permitir a adaptação tecnológica das concessionárias:
 >
 > 1. **Fase 1 (Entrega em Excel):** Coleta inicial dos dados de **atributos** (não geográficos) através de planilhas Excel padronizadas.
 >

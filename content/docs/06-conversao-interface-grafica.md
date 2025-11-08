@@ -1,12 +1,14 @@
 ---
-title: "6. Conversão de Planilha"
+title: "6. Conversão de Planilha para GeoJSON (Interface Gráfica)"
 weight: 60
 bookToc: true
 ---
 
-## **6. Conversão de Planilha (Excel/CSV) para GeoJSON**
+## **6. Conversão de Planilha para GeoJSON (Interface Gráfica)**
 
-Este capítulo apresenta métodos práticos para converter as planilhas Excel em arquivos GeoJSON válidos. Oferecemos opções tanto para **usuários sem conhecimento de programação** quanto para desenvolvedores.
+Este capítulo apresenta métodos práticos para converter planilhas Excel em arquivos GeoJSON válidos **usando ferramentas de interface gráfica** (QGIS) e edição manual.
+
+**Público-alvo:** Usuários sem conhecimento de programação.
 
 **📥 Download dos Templates:**
 Os templates estão disponíveis no Portal de Dados Abertos da ARTESP:
@@ -17,13 +19,50 @@ Os templates estão disponíveis no Portal de Dados Abertos da ARTESP:
 
 ---
 
-### **6.1 Guia Passo a Passo para Não-Programadores**
+## **6.1 Introdução e Visão Geral**
 
-Este guia é para usuários sem conhecimento de programação que precisam converter planilhas Excel em GeoJSON.
+Este guia apresenta um processo passo a passo para usuários que preferem trabalhar com ferramentas visuais (QGIS) em vez de programação.
+
+```mermaid
+flowchart TD
+    Start([Iniciar Conversão])
+
+    Start --> Q1{Tem QGIS<br/>instalado?}
+
+    Q1 -->|Não| Install[Instalar QGIS<br/>qgis.org/download]
+    Install --> Q2
+
+    Q1 -->|Sim| Q2{Tem geometrias<br/>WKT prontas?}
+
+    Q2 -->|Não| Q3{Precisa desenhar<br/>geometrias<br/>manualmente?}
+
+    Q3 -->|Sim| Opt1[✨ OPÇÃO 1<br/>Lat/Lon + QGIS<br/>Desenho Manual]
+    Q3 -->|Não, prefiro<br/>linha de comando| Opt3[OPÇÃO 3<br/>ogr2ogr<br/>Linha de Comando]
+
+    Q2 -->|Sim| Opt2[OPÇÃO 2<br/>WKT + QGIS<br/>Importação]
+
+    Opt1 --> End([Siga para seção 6.4.1])
+    Opt2 --> End
+    Opt3 --> End
+
+    style Opt1 fill:#e1f5e1,stroke:#4caf50,stroke-width:3px
+    style Opt2 fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style Opt3 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style Start fill:#f3e5f5,stroke:#9c27b0
+    style End fill:#f3e5f5,stroke:#9c27b0
+```
+
+**Passos do processo:**
+1. Preparar a planilha Excel
+2. Limpar e adicionar coluna ID
+3. Escolher método de geometria (3 opções)
+4. Exportar para GeoJSON via QGIS
+5. Adicionar metadados e ajustar formato
+6. Validar o arquivo
 
 ---
 
-#### **6.1.1 Passo 1: Preparar a Planilha Excel**
+## **6.2 Passo 1: Preparar a Planilha Excel**
 
 1. **Baixe o template apropriado** do Portal de Dados Abertos:
    - Para conservação: `template_lxx_conservacao_2026_r0.xlsx`
@@ -64,7 +103,7 @@ Este guia é para usuários sem conhecimento de programação que precisam conve
 
 ---
 
-#### **6.1.2 Passo 2: Limpar e Preparar a Planilha**
+## **6.3 Passo 2: Limpar e Preparar a Planilha**
 
 Antes de importar no QGIS, você precisa preparar a planilha:
 
@@ -96,19 +135,23 @@ Antes de importar no QGIS, você precisa preparar a planilha:
 
 ---
 
-#### **6.1.3 Passo 3: Escolher Método de Geometria**
+## **6.4 Passo 3: Escolher Método de Geometria**
 
 Agora você precisa escolher **uma das três opções** para adicionar geometrias ao seu CSV:
 
-| Opção | Método | Quando usar | Nível |
-|:------|:-------|:------------|:------|
-| **1** | Lat/Lon + QGIS (desenho manual) | Precisa desenhar geometrias visualmente no mapa | Iniciante |
-| **2** | WKT + QGIS | Já tem as geometrias WKT prontas | Intermediário |
-| **3** | ogr2ogr (linha de comando) | Prefere automação, já tem WKT ou lat/lon | Avançado |
+**Tabela Comparativa:**
+
+| Opção | Método | Pré-requisitos | Tempo Estimado | Dificuldade | Quando Usar |
+|:------|:-------|:---------------|:---------------|:------------|:------------|
+| **1** 🌟 | Lat/Lon + QGIS (desenho manual) | QGIS instalado | 30-60 min | ⭐⭐ Baixa | Você precisa desenhar geometrias visualmente no mapa |
+| **2** | WKT + QGIS | QGIS instalado + geometrias WKT prontas | 15-30 min | ⭐⭐⭐ Média | Você já tem as geometrias WKT prontas em outro sistema |
+| **3** | ogr2ogr (linha de comando) | GDAL instalado + linha de comando | 20-40 min | ⭐⭐⭐⭐ Alta | Você prefere automação e tem experiência com terminal |
+
+**💡 Recomendação:** Se você é iniciante e não tem geometrias prontas, use a **Opção 1** (marcada com 🌟).
 
 ---
 
-##### **OPÇÃO 1: Coordenadas Lat/Lon (para desenhar geometrias manualmente no QGIS)**
+### **6.4.1 OPÇÃO 1: Coordenadas Lat/Lon + Desenho Manual no QGIS** 🌟 RECOMENDADO
 
 Use esta opção quando você quiser desenhar as geometrias visualmente no QGIS (pontos, linhas ou polígonos).
 
@@ -170,11 +213,11 @@ Agora você verá os pontos de referência no mapa. Para cada linha de dados, de
 4. **Salvar edições:**
    - Clique em **Salvar Edições** e depois **Alternar Edição** novamente
 
-**E. Pular para o Passo 4** (Exportar para GeoJSON)
+**E. Prosseguir para o Passo 4** (Exportar para GeoJSON)
 
 ---
 
-##### **OPÇÃO 2: Coluna WKT (geometria pronta)**
+### **6.4.2 OPÇÃO 2: Coluna WKT (geometria pronta)**
 
 Use esta opção se você já tem as geometrias no formato **WKT (Well-Known Text)** ou consegue gerá-las programaticamente.
 
@@ -214,7 +257,9 @@ Use esta opção se você já tem as geometrias no formato **WKT (Well-Known Tex
 
 ---
 
-##### **OPÇÃO 3: ogr2ogr (Conversão Direta CSV → GeoJSON)** (para usuários avançados)
+### **6.4.3 OPÇÃO 3: ogr2ogr (Conversão Direta CSV → GeoJSON)** ⚠️ Método Avançado
+
+**⚠️ ATENÇÃO:** Este método requer conhecimento de linha de comando e instalação do GDAL. Se você é iniciante, recomendamos usar a **Opção 1** ou **Opção 2**.
 
 Use esta opção se você prefere usar linha de comando e já tem as geometrias no CSV (como WKT ou lat/lon).
 
@@ -359,7 +404,7 @@ O arquivo gerado pelo `ogr2ogr` **NÃO estará 100% conforme o schema R0**. Voc�
 
 ---
 
-#### **6.1.4 Passo 4: Exportar para GeoJSON**
+## **6.5 Passo 4: Exportar para GeoJSON (QGIS)**
 
 **NOTA:** Este passo se aplica apenas se você usou **Opção 1** ou **Opção 2** (QGIS). Se você usou **Opção 3** (ogr2ogr), pule para o **Passo 5**.
 
@@ -387,7 +432,7 @@ Se você usou colunas `lat`, `lon` ou `wkt` para importação, você precisa rem
 
 ---
 
-#### **6.1.5 Passo 5: Adicionar Metadados e Ajustar Formato**
+## **6.6 Passo 5: Adicionar Metadados e Ajustar Formato**
 
 Abra o arquivo GeoJSON em um editor de texto e faça os seguintes ajustes.
 
@@ -395,7 +440,7 @@ Abra o arquivo GeoJSON em um editor de texto e faça os seguintes ajustes.
 
 ---
 
-**A. Converter Campo `local` de String para Array:**
+### **6.6.1 Converter Campo `local` de String para Array (Obrigatório)**
 
 O campo `local` no GeoJSON exportado estará como string delimitada por `;`. Você precisa convertê-lo para array.
 
@@ -413,7 +458,7 @@ Escolha **uma das opções** abaixo para fazer essa conversão:
 
 ---
 
-##### **Opção 1: Edição Manual** (para poucos registros)
+#### **Opção 1: Edição Manual** (para poucos registros)
 
 Se você tem poucos registros, edite manualmente no editor de texto:
 
@@ -425,7 +470,7 @@ Se você tem poucos registros, edite manualmente no editor de texto:
 
 ---
 
-##### **Opção 2: Busca e Substituição com Regex no VS Code** (recomendado)
+#### **Opção 2: Busca e Substituição com Regex no VS Code** (recomendado)
 
 Use expressões regulares no VS Code para conversão semiautomática:
 
@@ -445,7 +490,7 @@ Use expressões regulares no VS Code para conversão semiautomática:
 
 ---
 
-##### **Opção 3: Script Python Automático** (mais confiável)
+#### **Opção 3: Script Python Automático** (mais confiável)
 
 Use um script Python para conversão automática e segura:
 
@@ -509,7 +554,7 @@ python converter_local.py L13_conservacao_2026_R0.geojson
 
 ---
 
-##### **Opção 4: jq (Ferramenta CLI)** (para usuários avançados)
+#### **Opção 4: jq (Ferramenta CLI)** (para usuários avançados)
 
 Se você tem `jq` instalado (ferramenta de processamento JSON via linha de comando):
 
@@ -554,7 +599,9 @@ jq '.features[].properties.local |= (
 - **Registros médios (10-100)**: Use **Opção 2** (Regex no VS Code)
 - **Muitos registros (> 100)**: Use **Opção 3** (Script Python) ou **Opção 4** (jq)
 
-**B. Adicionar Metadados ao Arquivo:**
+---
+
+### **6.6.2 Adicionar Metadados ao Arquivo**
 
 Logo após a linha `"type": "FeatureCollection",`, adicione:
 
@@ -580,7 +627,7 @@ Logo após a linha `"type": "FeatureCollection",`, adicione:
 
 ---
 
-#### **6.1.6 Passo 6: Validar o Arquivo**
+## **6.7 Passo 6: Validar o Arquivo**
 
 Após criar e ajustar o GeoJSON, **valide-o** usando o script fornecido pela ARTESP:
 
@@ -603,190 +650,4 @@ O script verificará:
 
 ---
 
-### **6.2 Método para Desenvolvedores: Python (pandas)**
-
-O script em Python a seguir converte automaticamente a planilha Excel em GeoJSON, seguindo as regras do schema.
-
-**Passo 1: Instalação das bibliotecas necessárias**
-
-```bash
-pip install pandas openpyxl
-```
-
-**Passo 2: Script de Conversão (Python 3.8+)**
-
-> **Nota:** Este script converte a planilha Excel para GeoJSON, processando o campo `local` e gerando IDs únicos automaticamente. A geometria deve ser adicionada separadamente (ver Seção 7).
-
-```python
-import pandas as pd
-import json
-from datetime import datetime
-import sys
-
-def converter_planilha_para_geojson(
-    arquivo_planilha,
-    arquivo_geojson_saida,
-    tipo_template,  # 'conservacao' ou 'obras'
-    lote,  # Ex: 'L13'
-    aba_planilha="Dados"
-):
-    """
-    Converte uma planilha Excel/CSV para GeoJSON conforme schema R0.
-
-    - Processa campo 'local' (separado por ';') para array
-    - Gera campo 'id' único automaticamente
-    - Configura metadados e CRS corretamente
-
-    A geometria deve ser adicionada separadamente usando QGIS ou outro método.
-    """
-
-    print(f"Lendo planilha: {arquivo_planilha}")
-    try:
-        if arquivo_planilha.endswith('.xlsx'):
-            # Ignora as 5 primeiras linhas do template (cabeçalho + instruções + exemplos)
-            df = pd.read_excel(arquivo_planilha, sheet_name=aba_planilha, skiprows=5)
-        elif arquivo_planilha.endswith('.csv'):
-            df = pd.read_csv(arquivo_planilha, skiprows=5)
-        else:
-            raise ValueError("Formato não suportado (use .xlsx ou .csv)")
-    except Exception as e:
-        print(f"Erro ao ler planilha: {e}")
-        return
-
-    # Remover linhas completamente vazias
-    df = df.dropna(how='all')
-
-    print(f"Encontradas {len(df)} linhas de dados.")
-
-    features = []
-
-    for idx, row in df.iterrows():
-        # Gerar ID único (formato: tipo-lote-sequencial)
-        id_feature = f"{tipo_template[:8]}-{lote}-{str(idx+1).zfill(3)}"
-
-        # Processar campo 'local' (separado por ';' no Excel → array no JSON)
-        local_value = row.get('local', '')
-        if pd.notna(local_value) and local_value:
-            # Dividir por ';' e remover espaços
-            local_array = [loc.strip() for loc in str(local_value).split(';') if loc.strip()]
-        else:
-            local_array = []
-
-        # Construir properties
-        properties = {
-            'id': id_feature,
-            'lote': row.get('lote'),
-            'rodovia': row.get('rodovia'),
-            'detalhamento_servico': row.get('detalhamento_servico'),
-            'unidade': row.get('unidade'),
-            'quantidade': row.get('quantidade'),
-            'km_inicial': row.get('km_inicial'),
-            'km_final': row.get('km_final'),
-            'local': local_array,
-            'data_inicial': row.get('data_inicial'),
-            'data_final': row.get('data_final'),
-            'observacoes_gerais': row.get('observacoes_gerais')
-        }
-
-        # Adicionar campos específicos por tipo
-        if tipo_template == 'conservacao':
-            properties['item'] = row.get('item')
-        elif tipo_template == 'obras':
-            properties['programa'] = row.get('programa')
-            properties['item'] = int(row.get('item')) if pd.notna(row.get('item')) else None
-            properties['subitem'] = int(row.get('subitem')) if pd.notna(row.get('subitem')) else None
-
-        # Converter datas para string no formato YYYY-MM-DD
-        for campo_data in ['data_inicial', 'data_final']:
-            if pd.notna(properties[campo_data]):
-                if isinstance(properties[campo_data], pd.Timestamp):
-                    properties[campo_data] = properties[campo_data].strftime('%Y-%m-%d')
-                else:
-                    # Se já for string, garantir formato correto
-                    properties[campo_data] = str(properties[campo_data])
-
-        # Converter NaN/None para null JSON
-        properties_limpas = {}
-        for k, v in properties.items():
-            if pd.isna(v) or (isinstance(v, str) and v.strip() == ''):
-                properties_limpas[k] = None
-            else:
-                properties_limpas[k] = v
-
-        # Criar feature (geometria None - deve ser adicionada depois)
-        feature = {
-            "type": "Feature",
-            "geometry": None,  # Geometria deve ser adicionada com QGIS ou outro método
-            "properties": properties_limpas
-        }
-        features.append(feature)
-
-    # Estrutura GeoJSON final
-    geojson_final = {
-        "type": "FeatureCollection",
-        "crs": {
-            "type": "name",
-            "properties": { "name": "urn:ogc:def:crs:EPSG::4674" }
-        },
-        "metadata": {
-            "schema_version": "R0",
-            "data_geracao": datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')
-        },
-        "features": features
-    }
-
-    # Salvar arquivo
-    with open(arquivo_geojson_saida, 'w', encoding='utf-8') as f:
-        json.dump(geojson_final, f, ensure_ascii=False, indent=2)
-
-    print(f"✅ Arquivo '{arquivo_geojson_saida}' criado com {len(features)} features.")
-    print(f"⚠️  As geometrias estão NULL. Use QGIS para adicionar geometrias (Seção 7).")
-    print(f"⚠️  Valide o arquivo antes de enviar: python validar_geojson.py")
-
-
-# --- Como usar ---
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Uso: python converter.py <arquivo_excel> <conservacao|obras> <lote> <arquivo_saida>")
-        print("Exemplo: python converter.py template_lxx_conservacao_2026_r0.xlsx conservacao L13 L13_conservacao_2026_R0.geojson")
-        sys.exit(1)
-
-    arquivo_entrada = sys.argv[1]
-    tipo = sys.argv[2]
-    lote = sys.argv[3]
-    arquivo_saida = sys.argv[4]
-
-    if tipo not in ['conservacao', 'obras']:
-        print("Erro: O tipo deve ser 'conservacao' ou 'obras'")
-        sys.exit(1)
-
-    converter_planilha_para_geojson(
-        arquivo_planilha=arquivo_entrada,
-        arquivo_geojson_saida=arquivo_saida,
-        tipo_template=tipo,
-        lote=lote,
-        aba_planilha="Dados"
-    )
-```
-
-**Passo 3: Como executar o script**
-
-```bash
-# Para arquivo de conservação do lote L13
-python converter.py template_lxx_conservacao_2026_r0.xlsx conservacao L13 L13_conservacao_2026_R0.geojson
-
-# Para arquivo de obras do lote L22
-python converter.py template_lxx_obras_2026_r0.xlsx obras L22 L22_obras_2026_R0.geojson
-```
-
-**O que o script faz:**
-
-1. ✅ Lê a planilha Excel (pulando linhas de cabeçalho/exemplos)
-2. ✅ Gera IDs únicos automaticamente (formato: `conservacao-L13-001`, `obra-L22-001`)
-3. ✅ Converte campo `local` de string delimitada para array
-4. ✅ Formata datas para YYYY-MM-DD
-5. ✅ Configura CRS como `urn:ogc:def:crs:EPSG::4674`
-6. ✅ Adiciona metadados corretos (sem `ano_programacao`)
-7. ⚠️ Cria geometrias NULL (devem ser adicionadas com QGIS - ver Seção 7)
-
----
+**🎉 Parabéns!** Se a validação passou, seu arquivo GeoJSON está pronto para envio à ARTESP.
