@@ -166,6 +166,6 @@ bookToc: true
 
 **Causa:** O script de conversão não realizou o agrupamento por `id` e a agregação do campo `local`.
 
-**✅ Solução:** Use o script da **Seção 6.1** deste manual para garantir que os dados da planilha sejam corretamente agrupados em uma única feature por `id`, com o campo `local` como um array.
+**✅ Solução:** Use o script do **Capítulo 7 (Conversão Programática)** deste manual para garantir que os dados da planilha sejam corretamente agrupados em uma única feature por `id`, com o campo `local` como um array.
 
 ---
