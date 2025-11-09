@@ -40,7 +40,7 @@ A ARTESP adotou o formato GeoJSON especificamente para obter **geometrias realis
 **❌ NÃO SERÃO ACEITOS:**
 - ❌ MULTIPOINT com apenas 2 pontos (início e fim) para representar serviços lineares
 - ❌ LineString com apenas 2 pontos (linha reta) que não acompanha o traçado da rodovia
-- ❌ Geometrias aproximadas ou simplificadas para obras que requerem precisão
+- ❌ Geometrias aproximadas ou simplificadas para serviços que requerem precisão
 
 **✅ Implicações para escolha do método:**
 - **Opção 1 (Fórmula Excel)**: Gera MULTIPOINT → **Aceita APENAS para serviços pontuais onde km_inicial = km_final**
