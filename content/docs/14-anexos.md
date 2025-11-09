@@ -18,7 +18,9 @@ Os arquivos necessários para validação e referência estão disponíveis no p
 |:---------------------------|:-------------------------------------------------------------|:----------|
 | **JSON Schema (R0)**       | `conserva.schema.r0.json` / `obras.schema.r0.json`           | Schemas versão R0 para validação estrutural e de dados. |
 | **Script de Validação**    | `validar_geojson.py`                                         | Script Python para validação automatizada de arquivos GeoJSON (veja seção 9.1.3). |
+| **Script de Mesclagem**    | `mesclar_geojson.py`                                         | Script Python para combinar múltiplos arquivos GeoJSON em um único (veja seções 6.5.A e 7.8). |
 | **Tabelas de Códigos**     | `rodovias.xlsx`,`local.xlsx`, `programas.xlsx`, `item.xlsx`  | Arquivos de referência para os códigos permitidos. |
+| **Camadas de Rodovias**    | `sp_rodovias_*.geojson` (4 arquivos)                         | Camadas OSM das rodovias de SP em diferentes CRS (veja seção 14.2). |
 
 > **Nota sobre versões:** Os schemas incluem a versão no nome do arquivo (ex: `.r0.json`). Sempre use o schema correspondente ao valor de `schema_version` no campo metadata do seu GeoJSON.
 
