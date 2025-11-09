@@ -1,0 +1,52 @@
+<!-- Make all links open in new tab -->
+<script>
+(function() {
+  'use strict';
+
+  function updateLinks() {
+    // Get all links in the content area
+    const links = document.querySelectorAll('a[href]');
+
+    links.forEach(function(link) {
+      const href = link.getAttribute('href');
+
+      // Skip if no href
+      if (!href) return;
+
+      // Skip anchor links (internal page navigation)
+      if (href.startsWith('#')) return;
+
+      // Check if it's an external link (starts with http:// or https://)
+      const isExternal = href.startsWith('http://') || href.startsWith('https://');
+
+      if (isExternal) {
+        try {
+          // Check if it's a different domain
+          const currentDomain = window.location.hostname;
+          const linkUrl = new URL(href);
+
+          if (linkUrl.hostname !== currentDomain) {
+            // External link to different domain - open in new tab
+            link.setAttribute('target', '_blank');
+
+            // Add rel="noopener noreferrer" for security
+            // noopener: prevents the new page from accessing window.opener
+            // noreferrer: prevents sending referrer information
+            link.setAttribute('rel', 'noopener noreferrer');
+          }
+        } catch (e) {
+          // If URL parsing fails, ignore this link
+          console.warn('Failed to parse URL:', href);
+        }
+      }
+    });
+  }
+
+  // Run when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateLinks);
+  } else {
+    updateLinks();
+  }
+})();
+</script>
