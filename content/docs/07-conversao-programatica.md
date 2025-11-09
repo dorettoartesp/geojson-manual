@@ -1015,6 +1015,564 @@ python converter_completo.py --fonte postgis --config db_config.json --tipo obra
 
 ---
 
+## **7.8 Mesclagem de Arquivos GeoJSON (Múltiplas Geometrias)**
+
+### **Contexto e Necessidade**
+
+Quando você trabalha com QGIS e precisa criar geometrias de **tipos diferentes** (Point, LineString, Polygon) para representar diferentes serviços, você encontra uma limitação técnica:
+
+**Problema:**
+- Cada camada GeoPackage/Shapefile no QGIS aceita **apenas UM tipo de geometria**
+- Se você tem serviços com Point + LineString + Polygon, precisa criar **3 camadas separadas**
+- Ao exportar cada camada, você obtém **3 arquivos GeoJSON separados**
+
+**Exigência do Schema:**
+- O schema ARTESP R0 exige **UM ÚNICO arquivo GeoJSON** final
+- Este arquivo deve conter **TODAS as features**, independente do tipo de geometria
+- O schema permite geometrias mistas no mesmo FeatureCollection
+
+**Solução:**
+- Script Python `mesclar_geojson.py` que combina múltiplos arquivos GeoJSON em um único
+
+---
+
+### **7.8.1 Funcionalidades do Script**
+
+O script `mesclar_geojson.py` realiza as seguintes operações:
+
+1. ✅ **Carrega múltiplos arquivos GeoJSON** (2 ou mais)
+2. ✅ **Valida estrutura** de cada arquivo (FeatureCollection, features, geometria, properties)
+3. ✅ **Extrai todas as features** de todos os arquivos
+4. ✅ **Verifica IDs únicos** - detecta e reporta IDs duplicados
+5. ✅ **Combina em único FeatureCollection** preservando todos os atributos
+6. ✅ **Adiciona CRS** (EPSG:4674 - SIRGAS 2000)
+7. ✅ **Adiciona metadata** (schema_version: R0, data_geracao com timestamp)
+8. ✅ **Gera relatório detalhado** com estatísticas de tipos de geometria
+9. ✅ **Salva arquivo final** pronto para validação
+
+---
+
+### **7.8.2 Código-Fonte Completo**
+
+O código completo está disponível em `/scripts/mesclar_geojson.py` do projeto.
+
+**Estrutura do script:**
+
+```python
+#!/usr/bin/env python3
+"""
+Mescla múltiplos arquivos GeoJSON em um único FeatureCollection.
+"""
+
+import json
+import sys
+import os
+import argparse
+from datetime import datetime, timezone
+from collections import Counter
+
+# Funções principais:
+# - validar_geojson_entrada(arquivo) → valida estrutura JSON/GeoJSON
+# - extrair_features(data, arquivo) → extrai e valida features
+# - validar_ids_unicos(features) → verifica duplicatas de IDs
+# - mesclar_geojson_files(entrada, saida) → função principal de mesclagem
+# - main() → CLI com argparse
+```
+
+**Principais funções:**
+
+#### **validar_geojson_entrada(arquivo)**
+
+Valida se um arquivo é um GeoJSON válido antes de processar:
+
+```python
+def validar_geojson_entrada(arquivo):
+    """Valida se o arquivo é um GeoJSON válido."""
+    try:
+        with open(arquivo, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"❌ ERRO: Arquivo não encontrado: '{arquivo}'")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"❌ ERRO: Arquivo '{arquivo}' não é um JSON válido: {e}")
+        return None
+
+    # Verifica estrutura básica de GeoJSON
+    if data.get('type') != 'FeatureCollection':
+        print(f"⚠️  AVISO: '{arquivo}' não é um FeatureCollection")
+
+    if 'features' not in data:
+        print(f"⚠️  AVISO: '{arquivo}' não contém campo 'features'")
+
+    return data
+```
+
+---
+
+#### **extrair_features(data, arquivo)**
+
+Extrai features válidas de um GeoJSON:
+
+```python
+def extrair_features(data, arquivo):
+    """Extrai as features de um GeoJSON."""
+    features = data.get('features', [])
+
+    if not features:
+        print(f"⚠️  AVISO: '{arquivo}' não contém features")
+        return []
+
+    features_validas = []
+    for idx, feature in enumerate(features):
+        # Valida estrutura mínima
+        if 'geometry' not in feature:
+            print(f"⚠️  Feature {idx} em '{arquivo}' sem geometria, ignorando")
+            continue
+
+        if 'properties' not in feature:
+            print(f"⚠️  Feature {idx} em '{arquivo}' sem properties, ignorando")
+            continue
+
+        features_validas.append(feature)
+
+    return features_validas
+```
+
+---
+
+#### **validar_ids_unicos(features)**
+
+Verifica se os IDs são únicos em todas as features:
+
+```python
+def validar_ids_unicos(features, emitir_aviso=True):
+    """Valida se todos os IDs são únicos e reporta duplicatas."""
+    ids = []
+    for feature in features:
+        feature_id = feature.get('properties', {}).get('id')
+        if feature_id is not None:
+            ids.append(feature_id)
+
+    # Contar ocorrências de cada ID
+    id_counts = Counter(ids)
+    ids_duplicados = {id_val: count
+                      for id_val, count in id_counts.items()
+                      if count > 1}
+
+    if emitir_aviso and ids_duplicados:
+        print(f"\n⚠️  AVISO: {len(ids_duplicados)} IDs duplicados:")
+        for dup_id, count in sorted(ids_duplicados.items()):
+            print(f"  ID '{dup_id}' aparece {count} vezes")
+
+    return len(set(ids)), ids_duplicados
+```
+
+---
+
+#### **mesclar_geojson_files(arquivos_entrada, arquivo_saida)**
+
+Função principal que realiza a mesclagem:
+
+```python
+def mesclar_geojson_files(arquivos_entrada, arquivo_saida, incluir_metadata=True):
+    """Mescla múltiplos arquivos GeoJSON em um único FeatureCollection."""
+
+    todas_features = []
+
+    # Processar cada arquivo de entrada
+    for arquivo in arquivos_entrada:
+        data = validar_geojson_entrada(arquivo)
+        if data is None:
+            continue
+
+        features = extrair_features(data, arquivo)
+        if not features:
+            continue
+
+        # Reportar tipos de geometria
+        geom_types = Counter(f.get('geometry', {}).get('type')
+                            for f in features)
+        print(f"✅ {len(features)} features extraídas:")
+        for geom_type, count in sorted(geom_types.items()):
+            print(f"   - {geom_type}: {count}")
+
+        todas_features.extend(features)
+
+    # Validar IDs únicos
+    ids_unicos, ids_duplicados = validar_ids_unicos(todas_features)
+
+    # Construir GeoJSON de saída
+    geojson_saida = {
+        "type": "FeatureCollection",
+        "features": todas_features
+    }
+
+    if incluir_metadata:
+        geojson_saida["crs"] = {
+            "type": "name",
+            "properties": {
+                "name": "urn:ogc:def:crs:EPSG::4674"
+            }
+        }
+
+        # Data/hora com timezone
+        agora = datetime.now(timezone.utc).astimezone()
+        data_geracao = agora.strftime('%Y-%m-%dT%H:%M:%S%z')
+        data_geracao = data_geracao[:-2] + ':' + data_geracao[-2:]
+
+        geojson_saida["metadata"] = {
+            "schema_version": "R0",
+            "data_geracao": data_geracao
+        }
+
+    # Salvar arquivo
+    with open(arquivo_saida, 'w', encoding='utf-8') as f:
+        json.dump(geojson_saida, f, ensure_ascii=False, indent=2)
+
+    print(f"\n✅ Arquivo mesclado salvo: {arquivo_saida}")
+
+    return True
+```
+
+---
+
+### **7.8.3 Exemplos de Uso**
+
+#### **Exemplo 1: Mesclar 2 arquivos (Points + LineStrings)**
+
+```bash
+python scripts/mesclar_geojson.py \
+    L13_conservacao_points.geojson \
+    L13_conservacao_lines.geojson \
+    -o L13_conservacao_2026_R0.geojson
+```
+
+**Saída esperada:**
+
+```
+======================================================================
+  Mesclagem de Arquivos GeoJSON
+======================================================================
+
+📂 Arquivos de entrada: 2
+
+[1/2] Processando: L13_conservacao_points.geojson
+------------------------------------------------------------
+✅ 12 features extraídas:
+   - Point: 12
+
+[2/2] Processando: L13_conservacao_lines.geojson
+------------------------------------------------------------
+✅ 5 features extraídas:
+   - LineString: 5
+
+======================================================================
+📊 Resumo da Mesclagem
+======================================================================
+Total de features: 17
+Tipos de geometria:
+  - LineString: 5
+  - Point: 12
+
+Verificando unicidade dos IDs...
+IDs únicos: 17
+
+✅ Arquivo mesclado salvo com sucesso!
+📁 Arquivo de saída: L13_conservacao_2026_R0.geojson
+📏 Tamanho: 28.4 KB
+
+======================================================================
+✅ Próximo passo: Validar com validar_geojson.py
+======================================================================
+```
+
+---
+
+#### **Exemplo 2: Mesclar 3 arquivos (Points + LineStrings + Polygons)**
+
+```bash
+python scripts/mesclar_geojson.py \
+    L22_obras_points_TEMP.geojson \
+    L22_obras_lines_TEMP.geojson \
+    L22_obras_polygons_TEMP.geojson \
+    -o L22_obras_2026_R0.geojson
+```
+
+---
+
+#### **Exemplo 3: Mesclar sem adicionar metadata**
+
+Útil se você quiser adicionar metadata manualmente depois:
+
+```bash
+python scripts/mesclar_geojson.py \
+    arquivo1.geojson \
+    arquivo2.geojson \
+    -o saida.geojson \
+    --no-metadata
+```
+
+---
+
+#### **Exemplo 4: Mesclar 4 ou mais arquivos**
+
+O script aceita quantos arquivos você precisar:
+
+```bash
+python scripts/mesclar_geojson.py \
+    L07_points.geojson \
+    L07_lines.geojson \
+    L07_polygons.geojson \
+    L07_multipoints.geojson \
+    -o L07_conservacao_2026_R0.geojson
+```
+
+---
+
+### **7.8.4 Opções da Linha de Comando**
+
+```bash
+python mesclar_geojson.py [arquivos...] -o SAIDA [opções]
+```
+
+**Argumentos posicionais:**
+- `arquivos` - Lista de arquivos GeoJSON para mesclar (mínimo 2)
+
+**Argumentos obrigatórios:**
+- `-o`, `--output` - Arquivo de saída (GeoJSON mesclado)
+
+**Argumentos opcionais:**
+- `--no-metadata` - Não adicionar campos CRS e metadata ao arquivo de saída
+- `-h`, `--help` - Exibir ajuda
+
+**Exemplos:**
+
+```bash
+# Ajuda
+python mesclar_geojson.py --help
+
+# Uso mínimo
+python mesclar_geojson.py arq1.geojson arq2.geojson -o saida.geojson
+
+# Com múltiplos arquivos
+python mesclar_geojson.py *.geojson -o combinado.geojson
+
+# Sem metadata
+python mesclar_geojson.py a.geojson b.geojson -o saida.geojson --no-metadata
+```
+
+---
+
+### **7.8.5 Validações Realizadas**
+
+O script realiza as seguintes validações durante o processamento:
+
+| Validação | Descrição | Comportamento em caso de erro |
+|-----------|-----------|-------------------------------|
+| **Arquivo existe** | Verifica se arquivo de entrada existe | ❌ Reporta erro e pula arquivo |
+| **JSON válido** | Valida sintaxe JSON | ❌ Reporta erro e pula arquivo |
+| **FeatureCollection** | Verifica se type = "FeatureCollection" | ⚠️ Emite aviso, continua processando |
+| **Campo features** | Verifica se contém campo "features" | ⚠️ Emite aviso, tenta extrair |
+| **Feature tem geometry** | Cada feature deve ter geometria | ⚠️ Pula feature inválida |
+| **Feature tem properties** | Cada feature deve ter properties | ⚠️ Pula feature inválida |
+| **IDs únicos** | Verifica duplicatas entre TODOS os IDs | ⚠️ Emite aviso, continua (não bloqueia) |
+| **Arquivo saída existe** | Pergunta se deseja sobrescrever | ⚠️ Solicita confirmação do usuário |
+
+**Nota importante sobre IDs duplicados:**
+- O script **detecta e reporta** IDs duplicados, mas **não bloqueia** a mesclagem
+- Isso permite que você veja o problema e corrija depois
+- IDs duplicados **falharão na validação** com `validar_geojson.py`
+- **Corrija os IDs antes de submeter o arquivo**
+
+---
+
+### **7.8.6 Estrutura do GeoJSON de Saída**
+
+O arquivo mesclado terá a seguinte estrutura:
+
+```json
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::4674"
+    }
+  },
+  "metadata": {
+    "schema_version": "R0",
+    "data_geracao": "2026-01-15T14:30:00-03:00"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.633, -23.550]
+      },
+      "properties": {
+        "id": "conserva-001",
+        "lote": "L13",
+        ...
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-46.633, -23.550], [-46.634, -23.551]]
+      },
+      "properties": {
+        "id": "conserva-002",
+        ...
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[...]]
+      },
+      "properties": {
+        "id": "conserva-003",
+        ...
+      }
+    }
+  ]
+}
+```
+
+**Campos adicionados automaticamente:**
+- `crs` - Sistema de coordenadas (EPSG:4674)
+- `metadata.schema_version` - Versão do schema (R0)
+- `metadata.data_geracao` - Timestamp ISO8601 com timezone
+
+---
+
+### **7.8.7 Tratamento de Erros Comuns**
+
+#### **Erro: "File not found"**
+
+```
+❌ ERRO: Arquivo não encontrado: 'arquivo.geojson'
+```
+
+**Solução:**
+- Verifique o caminho do arquivo
+- Use caminho absoluto ou relativo correto
+- No Windows, use `\` ou `/` nas pastas
+
+---
+
+#### **Erro: "Arquivo não é um JSON válido"**
+
+```
+❌ ERRO: Arquivo 'dados.geojson' não é um JSON válido:
+Expecting ',' delimiter: line 15 column 5
+```
+
+**Solução:**
+- Abra o arquivo em um editor JSON (VS Code)
+- Corrija erros de sintaxe (vírgulas, aspas, chaves)
+- Valide com um validador JSON online
+
+---
+
+#### **Aviso: "IDs duplicados encontrados"**
+
+```
+⚠️  AVISO: 2 IDs duplicados encontrados:
+  ID 'conserva-005' aparece 2 vezes
+  ID 'conserva-012' aparece 3 vezes
+```
+
+**Solução:**
+1. Abra os arquivos de entrada no QGIS
+2. Localize as features com IDs duplicados (tabela de atributos)
+3. Corrija os IDs para serem únicos
+4. Re-exporte as camadas
+5. Execute o script novamente
+
+---
+
+#### **Aviso: "Feature sem geometria"**
+
+```
+⚠️  Feature 5 em 'arquivo.geojson' sem geometria, ignorando
+```
+
+**Solução:**
+- A feature será ignorada (pulada)
+- Verifique no QGIS se todas features têm geometria válida
+- Re-exporte a camada se necessário
+
+---
+
+### **7.8.8 Integração com Workflow QGIS**
+
+O script se integra perfeitamente no workflow QGIS:
+
+```mermaid
+flowchart LR
+    QGIS["QGIS:<br/>Criar múltiplas camadas"]
+    Export["Exportar<br/>cada camada"]
+    Files["Múltiplos<br/>GeoJSON"]
+    Script["mesclar_geojson.py"]
+    Final["GeoJSON<br/>único"]
+    Validate["validar_geojson.py"]
+
+    QGIS --> Export
+    Export --> Files
+    Files --> Script
+    Script --> Final
+    Final --> Validate
+
+    style Script fill:#fff4e1
+    style Final fill:#e7f9e7
+```
+
+**Workflow completo:**
+
+1. **QGIS:** Criar camadas (points.gpkg, lines.gpkg, polygons.gpkg)
+2. **QGIS:** Exportar cada camada como GeoJSON
+3. **Script:** `python mesclar_geojson.py *.geojson -o final.geojson`
+4. **Validação:** `python validar_geojson.py schema.json final.geojson`
+5. **Submissão:** Upload no portal ARTESP
+
+---
+
+### **7.8.9 Download e Disponibilidade**
+
+**Onde encontrar o script:**
+
+1. **Pasta do projeto:** `/scripts/mesclar_geojson.py`
+2. **Portal de Dados Abertos ARTESP:**
+   - https://dadosabertos.artesp.sp.gov.br/dataset/programacao-de-obras
+3. **Código-fonte** completo nesta documentação (Seção 7.8.2)
+
+**Requisitos:**
+- Python 3.6 ou superior
+- Bibliotecas padrão (json, sys, os, argparse, datetime, collections)
+- Nenhuma dependência externa necessária
+
+**Instalação:**
+```bash
+# Nenhuma instalação necessária - use o script diretamente
+python scripts/mesclar_geojson.py --help
+```
+
+---
+
+### **7.8.10 Referências Cruzadas**
+
+- **Uso prático no QGIS:** [Seção 6.5.A - Múltiplas Camadas]({{< relref "06.5-exportar-validar#a-tratamento-de-múltiplas-camadas-com-geometrias-diferentes" >}})
+- **Aviso na criação de camadas:** [Seção 6.3 Passo D]({{< relref "06.3-metodo-qgis#passo-d-criar-camada-de-geometrias" >}})
+- **Validação após mesclagem:** [Capítulo 9 - Validação]({{< relref "09-validação-dos-arquivos" >}})
+- **Script de validação:** [Seção 9.1.3]({{< relref "09-validação-dos-arquivos#913-validação-via-script-python" >}})
+
+---
+
 **🎉 Parabéns!** Agora você tem um conjunto completo de ferramentas programáticas para converter dados de múltiplas fontes para GeoJSON conforme o schema ARTESP R0.
 
 **Próximos passos:**
