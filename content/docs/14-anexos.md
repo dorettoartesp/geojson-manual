@@ -435,7 +435,7 @@ ogrinfo arquivo.gpkg -sql "SELECT CreateSpatialIndex('nome_camada', 'geom')"
 
 Para instruções práticas de como adicionar e usar essas camadas durante a digitalização, consulte:
 
-➡️ [Seção 6.4.3 Passo C.3 - Camadas de Referência Geoespacial]({{< relref "06.3-metodo-qgis#passo-c3-camadas-de-referência-geoespacial-opcional" >}})
+➡️ [Seção 6.3 Passo C.3 - Camadas de Referência Geoespacial]({{< relref "06.3-metodo-qgis#passo-c3-camadas-de-referência-geoespacial-opcional" >}})
 
 ---
 
