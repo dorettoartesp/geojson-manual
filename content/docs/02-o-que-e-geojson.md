@@ -102,9 +102,9 @@ Representa uma sequência conectada de pontos.
 Para garantir a qualidade e precisão de geometrias LineString, é importante controlar a distância máxima entre pontos consecutivos.
 
 **Por que isso importa:**
-- Distâncias muito grandes entre pontos podem resultar em linhas "retas" que não seguem o traçado real da rodovia
-- Distâncias muito pequenas geram vértices excessivos e comprometem a performance
-- O espaçamento adequado garante representação fiel do trajeto
+- Distâncias muito grandes entre pontos (> 20m) podem resultar em linhas "retas" que não seguem o traçado real da rodovia
+- Distâncias muito pequenas (< 5m) geram vértices excessivos e comprometem a performance
+- O espaçamento adequado (~20m) garante representação fiel do trajeto com boa eficiência
 
 **Fórmula de Haversine** (para coordenadas geográficas em graus):
 
@@ -115,7 +115,7 @@ d = R × c
 ```
 
 Onde:
-- **R** = 6371 km (raio médio da Terra)
+- **R** = 6.371.000 m (raio médio da Terra)
 - **Δlat** = lat₂ - lat₁ (em radianos)
 - **Δlon** = lon₂ - lon₁ (em radianos)
 
@@ -133,9 +133,9 @@ def distancia_haversine(lon1, lat1, lon2, lat2):
         lon2, lat2: Coordenadas do segundo ponto (graus decimais)
 
     Retorna:
-        Distância em quilômetros
+        Distância em metros
     """
-    R = 6371  # Raio da Terra em km
+    R = 6371000  # Raio da Terra em metros
 
     # Converter de graus para radianos
     lat1_rad = math.radians(lat1)
@@ -155,21 +155,22 @@ def distancia_haversine(lon1, lat1, lon2, lat2):
 ponto1 = (-47.0653, -23.5489)
 ponto2 = (-47.0663, -23.5499)
 
-dist_km = distancia_haversine(ponto1[0], ponto1[1], ponto2[0], ponto2[1])
-print(f"Distância: {dist_km:.3f} km")
-# Saída: Distância: 0.136 km (136 metros)
+dist_m = distancia_haversine(ponto1[0], ponto1[1], ponto2[0], ponto2[1])
+print(f"Distância: {dist_m:.1f} m")
+# Saída: Distância: 136.3 m
 ```
 
 **Validação da Distância Máxima:**
 
 ```python
-def validar_distancias_linestring(coordinates, max_distancia_km=1.0):
+def validar_distancias_linestring(coordinates, max_distancia_m=20.0):
     """
     Valida se todos os segmentos de uma LineString respeitam a distância máxima.
 
     Parâmetros:
         coordinates: Lista de coordenadas [[lon, lat], ...]
-        max_distancia_km: Distância máxima permitida entre pontos consecutivos (km)
+        max_distancia_m: Distância máxima permitida entre pontos consecutivos (metros)
+                        Default: 20m (recomendado para trechos rodoviários)
 
     Retorna:
         (bool, list): (é_válido, lista_de_erros)
@@ -182,12 +183,12 @@ def validar_distancias_linestring(coordinates, max_distancia_km=1.0):
 
         dist = distancia_haversine(lon1, lat1, lon2, lat2)
 
-        if dist > max_distancia_km:
+        if dist > max_distancia_m:
             erros.append({
                 'segmento': f"{i} → {i+1}",
                 'ponto1': [lon1, lat1],
                 'ponto2': [lon2, lat2],
-                'distancia_km': round(dist, 3)
+                'distancia_m': round(dist, 1)
             })
 
     return len(erros) == 0, erros
@@ -195,31 +196,34 @@ def validar_distancias_linestring(coordinates, max_distancia_km=1.0):
 # Exemplo de validação
 linestring = [
     [-47.0653, -23.5489],
-    [-47.0663, -23.5499],
-    [-47.0800, -23.5600]  # Este segmento pode exceder o limite
+    [-47.0655, -23.5491],  # Distância ~31m - EXCEDE o limite de 20m
+    [-47.0800, -23.5600]   # Distância ~18km - MUITO ACIMA do limite
 ]
 
-valido, erros = validar_distancias_linestring(linestring, max_distancia_km=1.0)
+valido, erros = validar_distancias_linestring(linestring, max_distancia_m=20.0)
 
 if not valido:
     print("⚠️ Segmentos com distância excessiva encontrados:")
     for erro in erros:
-        print(f"  Segmento {erro['segmento']}: {erro['distancia_km']} km")
+        print(f"  Segmento {erro['segmento']}: {erro['distancia_m']:.1f} m")
 ```
 
 **📏 Recomendações de Distância:**
 
 | Tipo de Geometria | Distância Máxima Recomendada | Observações |
 |:------------------|:----------------------------|:------------|
-| Trechos rodoviários retos | 1 km | Adequado para rodovias com traçado simples |
-| Trechos com curvas suaves | 500 m | Melhor precisão em curvas |
-| Trechos com curvas acentuadas | 100-250 m | Necessário para representar curvas complexas |
-| Áreas urbanas/dispositivos | 50-100 m | Maior detalhamento |
+| **Trechos rodoviários gerais** | **20 m** | **Padrão recomendado** - equilíbrio entre precisão e performance |
+| Trechos rodoviários retos | 50-100 m | Pode ser relaxado em trechos retilíneos longos |
+| Trechos com curvas suaves | 20-30 m | Mantém fidelidade ao traçado |
+| Trechos com curvas acentuadas | 10-15 m | Necessário para representar curvas complexas |
+| Áreas urbanas/dispositivos | 5-10 m | Maior detalhamento em interseções e alças |
 
 **⚠️ Alertas:**
+- O padrão de **20 metros** oferece boa precisão sem gerar vértices excessivos
 - Evite vértices excessivos (> 1000 pontos por LineString) para não comprometer performance
 - Para trechos muito longos (> 50 km), considere dividir em múltiplas features
 - Use ferramentas GIS para simplificar geometrias quando apropriado
+- Distâncias inferiores a 5m raramente agregam precisão significativa
 
 ### **2.3.3 Polygon (Polígono)**
 
