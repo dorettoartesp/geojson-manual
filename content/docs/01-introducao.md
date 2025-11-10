@@ -18,7 +18,7 @@ bookToc: true
 
 ## **1.1 Escopo e Finalidade**
 
-Este manual técnico estabelece os procedimentos, critérios e diretrizes para a geração, conversão, validação e entrega de arquivos em formato GeoJSON à ARTESP, conforme especificado no **Memorando Circular nº 0087484992**.
+Este manual técnico estabelece os procedimentos, critérios e diretrizes para a geração, conversão, validação e entrega de arquivos em formato GeoJSON à ARTESP, conforme especificado no **Memorando Circular nro. 0087484992** (processo SEI nro. 134.00039278/2025-72) e **Memorando Circular nro. 0088571607** (processo SEI nro. 134.00040851/2025-91)
 
 **Este documento abrange:**
 
