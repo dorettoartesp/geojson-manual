@@ -12,10 +12,28 @@
   max-width: 100%;
   height: auto;
 }
+.book-code-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.1rem;
+  padding-top: 0.2rem;
+}
+
+.book-code-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.book-code-scroll .highlight,
+.book-code-scroll pre {
+  margin: 0;
+}
+
 .book-code-copy-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: calc(-1 * var(--book-code-copy-offset, 0.85rem));
+  right: 0.5rem;
   padding: 6px 12px;
   background-color: rgba(68, 138, 255, 0.85);
   color: white;
@@ -42,14 +60,6 @@
   background-color: rgba(46, 204, 113, 1);
 }
 
-.highlight {
-  position: relative;
-}
-
-pre {
-  position: relative;
-}
-
 /* Dark mode adjustments */
 .book-theme-dark .book-code-copy-button {
   background-color: rgba(68, 138, 255, 0.9);
@@ -64,6 +74,8 @@ pre {
 (function() {
   'use strict';
 
+  const copyButtonUpdaters = [];
+
   if (!navigator.clipboard) {
     console.warn('Clipboard API not available');
     return;
@@ -77,47 +89,85 @@ pre {
     return button;
   }
 
-  function addCopyButtons() {
-    // Find all code blocks - use more specific selectors
-    const codeBlocks = document.querySelectorAll('pre > code, div.highlight > pre');
+  function wrapBlock(element) {
+    if (!element || !element.parentElement) {
+      return null;
+    }
 
-    codeBlocks.forEach(function(element) {
-      let container, codeElement;
+    if (element.closest('.book-code-wrapper')) {
+      return element.closest('.book-code-wrapper');
+    }
 
-      // Determine container and code element based on structure
-      if (element.tagName === 'CODE') {
-        // Structure: <pre><code>...</code></pre>
-        container = element.parentElement;
-        codeElement = element;
-      } else if (element.tagName === 'PRE') {
-        // Structure: <div class="highlight"><pre>...</pre></div>
-        container = element.parentElement;
-        codeElement = element.querySelector('code') || element;
-      } else {
-        return; // Skip unknown structures
-      }
+    const wrapper = document.createElement('div');
+    wrapper.className = 'book-code-wrapper';
 
-      // Skip if not a valid code block container
-      if (!container || container.tagName === 'H1' || container.tagName === 'H2' ||
-          container.tagName === 'H3' || container.tagName === 'H4' ||
-          container.tagName === 'H5' || container.tagName === 'H6') {
+    const scroll = document.createElement('div');
+    scroll.className = 'book-code-scroll';
+
+    const parent = element.parentElement;
+    parent.insertBefore(wrapper, element);
+    wrapper.appendChild(scroll);
+    scroll.appendChild(element);
+
+    return wrapper;
+  }
+
+  function scheduleButtonAlignment(wrapper, button) {
+    function updatePosition() {
+      const previous = wrapper.previousElementSibling;
+      const reference = previous || wrapper;
+
+      if (!reference || !reference.getBoundingClientRect) {
+        button.style.setProperty('--book-code-copy-offset', '0.75rem');
         return;
       }
 
-      // Skip if button already exists
-      if (container.querySelector('.book-code-copy-button')) {
+      const existingOffset = button.style.getPropertyValue('--book-code-copy-offset');
+      button.style.setProperty('--book-code-copy-offset', '0px');
+
+      const referenceRect = reference.getBoundingClientRect();
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+
+      const referenceCenter = referenceRect.top + referenceRect.height / 2;
+      const buttonHalf = buttonRect.height / 2;
+      const offset = wrapperRect.top - referenceCenter + buttonHalf;
+
+      const finalOffset = Math.max(offset, 8);
+      button.style.setProperty('--book-code-copy-offset', `${finalOffset}px`);
+
+      if (existingOffset) {
+        requestAnimationFrame(() => {
+          button.style.setProperty('--book-code-copy-offset', `${finalOffset}px`);
+        });
+      }
+    }
+
+    copyButtonUpdaters.push(updatePosition);
+    requestAnimationFrame(updatePosition);
+  }
+
+  function addCopyButtons() {
+    const blocks = document.querySelectorAll('div.highlight, pre');
+
+    blocks.forEach(function(block) {
+      if (block.tagName === 'PRE' && block.closest('.highlight')) {
+        return; // handled by the parent highlight
+      }
+
+      const codeElement = block.querySelector('code') || block;
+      const wrapper = wrapBlock(block);
+
+      if (!wrapper || wrapper.querySelector('.book-code-copy-button')) {
         return;
       }
 
       const button = createCopyButton();
 
       button.addEventListener('click', function() {
-        // Get the code content
-        let code = codeElement.textContent || codeElement.innerText;
+        const code = codeElement.textContent || codeElement.innerText;
 
-        // Copy to clipboard
         navigator.clipboard.writeText(code).then(function() {
-          // Success feedback
           button.textContent = 'Copiado!';
           button.classList.add('copied');
 
@@ -135,8 +185,8 @@ pre {
         });
       });
 
-      container.style.position = 'relative';
-      container.appendChild(button);
+      wrapper.appendChild(button);
+      scheduleButtonAlignment(wrapper, button);
     });
   }
 
@@ -146,5 +196,9 @@ pre {
   } else {
     addCopyButtons();
   }
+
+  window.addEventListener('resize', () => {
+    copyButtonUpdaters.forEach((update) => requestAnimationFrame(update));
+  });
 })();
 </script>
