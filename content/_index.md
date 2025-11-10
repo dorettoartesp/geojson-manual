@@ -26,7 +26,9 @@ type: docs
 
 ## Sobre Este Manual
 
-Este manual técnico estabelece os procedimentos, critérios e diretrizes para a geração, conversão, validação e entrega de arquivos em formato GeoJSON à ARTESP, conforme especificado no **Memorando Circular nº 0087484992**.
+Este manual técnico estabelece os procedimentos, critérios e diretrizes para a geração, conversão, validação e entrega de arquivos em formato GeoJSON à ARTESP, conforme especificado no **Memorando Circular nro. 0087484992** (processo SEI nro. 134.00039278/2025-72) e **Memorando Circular nro. 0088571607** (processo SEI nro. 134.00040851/2025-91).
+
+> **Observação:** As diretrizes apresentadas neste manual procuram contemplar os fluxos operacionais mais recorrentes observados nas concessionárias, mas devem ser entendidas como orientações gerais de referência. Cada concessionária permanece responsável por adotar o método que melhor se aproxime da sua realidade institucional, levando em consideração as rotinas internas, os sistemas legados em uso e os fluxos de trabalho já estabelecidos.
 
 **O manual está organizado em 14 seções:**
 

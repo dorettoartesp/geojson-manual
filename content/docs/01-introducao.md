@@ -27,6 +27,8 @@ Este manual técnico estabelece os procedimentos, critérios e diretrizes para a
 - Procedimentos detalhados de conversão de dados tabulares (CSV, Excel) para GeoJSON, incluindo o agrupamento e agregação necessários
 - Validação e conformidade com os schemas JSON fornecidos
 
+> **Observação:** As diretrizes apresentadas neste manual procuram contemplar os fluxos operacionais mais recorrentes observados nas concessionárias, mas devem ser entendidas como orientações gerais de referência. Cada concessionária permanece responsável por adotar o método que melhor se aproxime da sua realidade institucional, levando em consideração as rotinas internas, os sistemas legados em uso e os fluxos de trabalho já estabelecidos.
+
 ---
 
 ## **1.2 Público-Alvo**
