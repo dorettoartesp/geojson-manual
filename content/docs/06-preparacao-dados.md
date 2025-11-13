@@ -19,7 +19,7 @@ Os templates estão disponíveis no Portal de Dados Abertos da ARTESP:
 
 ---
 
-## **6.1 Introdução e Visão Geral**
+## **Introdução e Visão Geral**
 
 Este guia apresenta um processo passo a passo para usuários que preferem trabalhar com ferramentas visuais (Excel + QGIS) em vez de programação.
 
@@ -100,7 +100,7 @@ flowchart TD
 
 ---
 
-## **6.2 Passo 1: Preparar a Planilha Excel**
+## **Passo 1: Preparar a Planilha Excel**
 
 1. **Baixe o template apropriado** do Portal de Dados Abertos:
    - Para conservação: `template_lxx_conservacao_2026_r0.xlsx`
@@ -141,7 +141,7 @@ flowchart TD
 
 ---
 
-## **6.3 Passo 2: Limpar e Preparar a Planilha**
+## **Passo 2: Limpar e Preparar a Planilha**
 
 Antes de importar no QGIS, você precisa preparar a planilha:
 
